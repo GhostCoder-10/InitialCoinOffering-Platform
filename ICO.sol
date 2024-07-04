@@ -5,7 +5,7 @@ pragma solidity ^0.8.20;
 // import "@openzeppelin/contracts/access/Ownable.sol";
 import "./MyToken.sol";
 
-contract testICO {
+contract testICO{
     MyToken public myToken;
     address public ContractOwner;
 
@@ -16,32 +16,25 @@ contract testICO {
         myToken = MyToken(_myTokenAddress);
     }
 
+
     //tokenamount = _amount
     //requiredethamount = ethamount
 
-    function buy(uint256 _amount) public payable {
-        require(_amount > 0, "AMOUNT SHOULD BE GREATER THAN 0");
 
-        uint256 ethAmount = _amount * myToken_per_Eth;
-        require(msg.value >= ethAmount, "NOT ENOUGH ETH");
+    function buy() public payable {
+        require(msg.value > 0, "AMOUNT SHOULD BE GREATER THAN 0");
 
-        bool sendToken = myToken.transferFrom(
-            ContractOwner,
-            msg.sender,
-            _amount
-        );
+        uint256 myTokenAmount = (msg.value * 100) / 0.001 ether;
+
+        require(myToken.balanceOf(ContractOwner) >= myTokenAmount, "Not enough token");
+
+        bool sendToken = myToken.transferFrom(ContractOwner, msg.sender, myTokenAmount);
         require(sendToken, "Transfer fail");
-
-        if (msg.value > ethAmount) {
-            payable(msg.sender).transfer(msg.value - ethAmount);
-        }
     }
 
     function withdrawToken() public {
-        require(
-            msg.sender == ContractOwner,
-            "Only owner can call this fucntion"
-        );
+        require(msg.sender == ContractOwner, "Only owner can call this fucntion");
         payable(ContractOwner).transfer(address(this).balance);
     }
+    
 }
